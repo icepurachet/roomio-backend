@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config'; // เพิ่มเข้ามาอ่าน env
 import { HotelsModule } from './hotels/hotels.module';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
@@ -20,15 +21,19 @@ import { HotelFullModule } from './hotel_full/hotel_full.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',         // ใส่ให้ตรงกับเครื่องคุณ
-      password: 'ณแำุึภตภค',             // ใส่รหัสผ่าน (หรือเว้นว่างถ้าไม่มี)
-      database: 'roomio',     // ชื่อฐานข้อมูลที่คุณสร้าง
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT, 10) || 3306,
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || 'ณแำุึภตภค',
+      database: process.env.DB_DATABASE || 'roomio',
       autoLoadEntities: true,
       synchronize: false,
+      ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : false, // ใช้ SSL เฉพาะตอนขึ้น Cloud (Aiven)
     }),
     HotelsModule,
     UsersModule,
@@ -44,7 +49,7 @@ import { HotelFullModule } from './hotel_full/hotel_full.module';
     OwnersModule,
     AuthModule,
     protectedModule,
-    HotelFullModule
+    HotelFullModule,
   ],
   controllers: [AppController],
   providers: [AppService],

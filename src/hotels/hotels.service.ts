@@ -31,7 +31,9 @@ export class HotelsService {
     }
 
     findAll(): Promise<Hotel[]> {
-        return this.hotelRepository.find() ;
+        return this.hotelRepository.find({
+            relations: ['hotel_images', 'rooms'],
+        });
     }
 
     async findOne(id: number): Promise<Hotel> {
